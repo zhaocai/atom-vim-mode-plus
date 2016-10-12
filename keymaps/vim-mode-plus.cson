@@ -10,7 +10,6 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus':
   'escape': 'vim-mode-plus:reset-normal-mode'
-  'ctrl-c': 'vim-mode-plus:reset-normal-mode'
   'ctrl-[': 'vim-mode-plus:reset-normal-mode'
 
 # all except normal
@@ -46,16 +45,11 @@
 # -------------------------
 'atom-text-editor.vim-mode-plus:not(.insert-mode)':
   'h': 'vim-mode-plus:move-left'
-  'left': 'vim-mode-plus:move-left'
   'backspace': 'core:move-left'
   'l': 'vim-mode-plus:move-right'
-  'space': 'vim-mode-plus:move-right'
-  'right': 'vim-mode-plus:move-right'
 
   'k': 'vim-mode-plus:move-up'
-  'up': 'vim-mode-plus:move-up'
   'j': 'vim-mode-plus:move-down'
-  'down': 'vim-mode-plus:move-down'
 
   'g k': 'vim-mode-plus:move-up-screen'
   'g j': 'vim-mode-plus:move-down-screen'
@@ -81,12 +75,9 @@
   'g _': 'vim-mode-plus:move-to-last-nonblank-character-of-line-and-down'
   '-': 'vim-mode-plus:move-to-first-character-of-line-up'
   '+': 'vim-mode-plus:move-to-first-character-of-line-down'
-  'enter': 'vim-mode-plus:move-to-first-character-of-line-down'
 
   'ctrl-u': 'vim-mode-plus:scroll-half-screen-up'
-  'ctrl-b': 'vim-mode-plus:scroll-full-screen-up'
   'ctrl-d': 'vim-mode-plus:scroll-half-screen-down'
-  'ctrl-f': 'vim-mode-plus:scroll-full-screen-down'
   'ctrl-e': 'vim-mode-plus:scroll-down'
   'ctrl-y': 'vim-mode-plus:scroll-up'
 
@@ -325,8 +316,6 @@
   'X': 'vim-mode-plus:delete-left'
   's': 'vim-mode-plus:substitute'
   '.': 'vim-mode-plus:repeat'
-  'ctrl-]': 'symbols-view:go-to-declaration'
-  'ctrl-t': 'symbols-view:return-from-declaration'
   '"': 'vim-mode-plus:set-register-name'
 
   # 'y s': 'vim-mode-plus:surround'
