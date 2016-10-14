@@ -2,7 +2,10 @@ LineEndingRegExp = /(?:\n|\r\n)$/
 _ = require 'underscore-plus'
 {BufferedProcess, Range} = require 'atom'
 
-{haveSomeNonEmptySelection, isSingleLine} = require './utils'
+{
+  haveSomeNonEmptySelection
+  isSingleLine
+} = require './utils'
 swrap = require './selection-wrapper'
 settings = require './settings'
 Base = require './base'
@@ -186,23 +189,46 @@ class CompactSpaces extends TransformString
       text.replace /^(\s*)(.*?)(\s*)$/gm, (m, leading, middle, trailing) ->
         leading + middle.split(/[ \t]+/).join(' ') + trailing
 
-class ReplaceSpaceToTab extends TransformString
+class ConvertToSoftTab extends TransformString
   @extend()
   @registerToSelectList()
-  displayName: 'Space to Tab'
-  getNewText: (text) ->
-    fileTabSize = @editor.getTabLength()
-    regex = new RegExp ' '.repeat(fileTabSize), 'g'
-    text.replace(regex, "\t").replace(/[ ]+\t/g, "\t")
+  displayName: 'Soft Tab'
+  wise: 'linewise'
 
-class ReplaceTabToSpace extends TransformString
+  mutateSelection: (selection) ->
+    scanRange = selection.getBufferRange()
+    @editor.scanInBufferRange /\t/g, scanRange, ({range, replace}) =>
+      # Replace \t to spaces which length is vary depending on tabStop and tabLenght
+      # So we directly consult it's screen representing length.
+      length = @editor.screenRangeForBufferRange(range).getExtent().column
+      replace(" ".repeat(length))
+
+class ConvertToHardTab extends TransformString
   @extend()
   @registerToSelectList()
-  displayName: 'Tab to Space'
-  getNewText: (text) ->
-    spacesText = new Array(@editor.getTabLength() + 1).join(' ')
-    regex = /\t/g
-    text.replace(regex, spacesText)
+  displayName: 'Hard Tab'
+
+  mutateSelection: (selection) ->
+    tabLength = @editor.getTabLength()
+    scanRange = selection.getBufferRange()
+    @editor.scanInBufferRange /[ \t]+/g, scanRange, ({range, replace}) =>
+      screenRange = @editor.screenRangeForBufferRange(range)
+      {start: {column: startColumn}, end: {column: endColumn}} = screenRange
+
+      # We can't naively replace spaces to tab, we have to consider valid tabStop column
+      # If nextTabStop column exceeds replacable range, we pad with spaces.
+      newText = ''
+      loop
+        remainder = startColumn %% tabLength
+        nextTabStop = startColumn + (if remainder is 0 then tabLength else remainder)
+        if nextTabStop > endColumn
+          newText += " ".repeat(endColumn - startColumn)
+        else
+          newText += "\t"
+        startColumn = nextTabStop
+        break if startColumn >= endColumn
+
+      replace(newText)
 
 # -------------------------
 class TransformStringByExternalCommand extends TransformString

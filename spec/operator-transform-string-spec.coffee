@@ -334,35 +334,35 @@ describe "Operator TransformString", ->
     it "repeating twice works on current-line and won't move cursor", ->
       ensure 'l g - g -', text: 'vim-mode\natom_text_editor\n', cursor: [0, 1]
 
-  describe 'ReplaceTabToSpace', ->
+  describe 'ConvertToSoftTab', ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g R': 'vim-mode-plus:replace-tab-to-space'
+          'g tab': 'vim-mode-plus:convert-to-soft-tab'
 
     describe "basic behavior", ->
       it "convert tabs to spaces", ->
-        spacesText = new Array(editor.getTabLength() + 1).join(' ')
+        expect(editor.getTabLength()).toBe(2)
         set
-          text: '	var10 =	0;'
+          text: "\tvar10 =\t\t0;"
           cursor: [0, 0]
-        ensure 'g R $',
-          text: "#{spacesText}var10 =#{spacesText}0;"
+        ensure 'g tab $',
+          text: "  var10 =   0;"
 
-  describe 'ReplaceSpaceToTab', ->
+  describe 'ConvertToHardTab', ->
     beforeEach ->
       atom.keymaps.add "test",
         'atom-text-editor.vim-mode-plus:not(.insert-mode)':
-          'g r': 'vim-mode-plus:replace-space-to-tab'
+          'g shift-tab': 'vim-mode-plus:convert-to-hard-tab'
 
     describe "basic behavior", ->
       it "convert spaces to tabs", ->
-        spacesText = new Array(editor.getTabLength() + 1).join(' ')
+        expect(editor.getTabLength()).toBe(2)
         set
-          text: "#{spacesText}var10 =#{spacesText}0;"
+          text: "  var10 =    0;"
           cursor: [0, 0]
-        ensure 'g r $',
-          text: '	var10 =	0;'
+        ensure 'g shift-tab $',
+          text: "\tvar10\t=\t\t 0;"
 
   describe 'CompactSpaces', ->
     beforeEach ->
