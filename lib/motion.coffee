@@ -56,14 +56,6 @@ class Motion extends Base
   isInclusive: ->
     @inclusive
 
-  forceWise: (wise) ->
-    if wise is 'characterwise'
-      if @wise is 'linewise'
-        @inclusive = false
-      else
-        @inclusive = not @inclusive
-    @wise = wise
-
   isCharacterwise: ->
     @wise is 'characterwise'
 
@@ -72,6 +64,14 @@ class Motion extends Base
 
   isBlockwise: ->
     @wise is 'blockwise'
+
+  forceWise: (wise) ->
+    if wise is 'characterwise'
+      if @wise is 'linewise'
+        @inclusive = false
+      else
+        @inclusive = not @inclusive
+    @wise = wise
 
   setBufferPositionSafely: (cursor, point) ->
     cursor.setBufferPosition(point) if point?
@@ -449,13 +449,15 @@ class MoveToNextParagraph extends Motion
     cursor.setBufferPosition(point)
 
   getPoint: (fromPoint) ->
-    wasAtNonBlankRow = not @editor.isBufferRowBlank(fromPoint.row)
-    for row in getBufferRows(@editor, {startRow: fromPoint.row, @direction})
+    startRow = fromPoint.row
+    wasAtNonBlankRow = not @editor.isBufferRowBlank(startRow)
+    for row in getBufferRows(@editor, {startRow, @direction})
       if @editor.isBufferRowBlank(row)
         return new Point(row, 0) if wasAtNonBlankRow
       else
         wasAtNonBlankRow = true
 
+    # fallback
     switch @direction
       when 'previous' then new Point(0, 0)
       when 'next' then @getVimEofBufferPosition()
@@ -553,26 +555,22 @@ class MoveToFirstCharacterOfLineAndDown extends MoveToFirstCharacterOfLineDown
 class MoveToFirstLine extends Motion
   @extend()
   wise: 'linewise'
-  defaultCount: null
+
+  getCount: ->
+    super - 1
 
   moveCursor: (cursor) ->
     cursor.setBufferPosition(@getPoint())
     cursor.autoscroll(center: true)
 
   getPoint: ->
-    getFirstCharacterPositionForBufferRow(@editor, @getRow())
-
-  getRow: ->
-    if (count = @getCount()) then count - 1 else @getDefaultRow()
-
-  getDefaultRow: ->
-    0
+    row = getValidVimBufferRow(@editor, @getCount())
+    getFirstCharacterPositionForBufferRow(@editor, row)
 
 # keymap: G
 class MoveToLastLine extends MoveToFirstLine
   @extend()
-  getDefaultRow: ->
-    @getVimLastBufferRow()
+  defaultCount: Infinity
 
 # keymap: N% e.g. 10%
 class MoveToLineByPercent extends MoveToFirstLine
