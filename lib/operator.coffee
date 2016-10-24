@@ -194,7 +194,8 @@ class Operator extends Base
     @patternForOccurrence ?= @occurrenceManager.buildPattern()
 
     selectedRanges = @editor.getSelectedBufferRanges()
-    if ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+    ranges = @occurrenceManager.getMarkerRangesIntersectsWithRanges(selectedRanges, @isMode('visual'))
+    if ranges.length
       @vimState.modeManager.deactivate() if @isMode('visual')
       @editor.setSelectedBufferRanges(ranges)
     else
@@ -433,6 +434,7 @@ class YankLine extends Yank
   wise: 'linewise'
 
   initialize: ->
+    super
     @target = 'MoveToRelativeLine' if @isMode('normal')
     if @isMode('visual', 'characterwise')
       @stayOnLinewise = false

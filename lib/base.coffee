@@ -222,6 +222,9 @@ class Base
   instanceof: (klassName) ->
     this instanceof Base.getClass(klassName)
 
+  is: (klassName) ->
+    this.constructor is Base.getClass(klassName)
+
   isOperator: ->
     @instanceof('Operator')
 
@@ -239,7 +242,7 @@ class Base
 
   getCursorBufferPosition: ->
     if @isMode('visual')
-      [@editor.getLastSelection()].map(@getCursorPositionForSelection.bind(this))[0]
+      @getCursorPositionForSelection(@editor.getLastSelection())
     else
       @editor.getCursorBufferPosition()
 
@@ -248,6 +251,12 @@ class Base
       @editor.getSelections().map(@getCursorPositionForSelection.bind(this))
     else
       @editor.getCursorBufferPositions()
+
+  getBufferPositionForCursor: (cursor) ->
+    if @isMode('visual')
+      @getCursorPositionForSelection(cursor.selection)
+    else
+      cursor.getBufferPosition()
 
   getCursorPositionForSelection: (selection) ->
     options = {fromProperty: true, allowFallback: true}
@@ -278,7 +287,8 @@ class Base
 
     [
       './operator', './operator-insert', './operator-transform-string',
-      './motion', './text-object',
+      './motion', './motion-search',
+      './text-object',
       './insert-mode', './misc-command'
     ].forEach(require)
 
